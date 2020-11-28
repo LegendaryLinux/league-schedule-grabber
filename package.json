@@ -1,0 +1,23 @@
+{
+  "name": "league-schedule-grabber",
+  "version": "1.0.0",
+  "description": "A small program to scrape a schedule row from a webpage and output it to a text file",
+  "main": "index.js",
+  "scripts": {
+    "run": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LegendaryLinux/league-schedule-scraper.git"
+  },
+  "author": "LegendaryLinux (Chris Wilson)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LegendaryLinux/league-schedule-scraper/issues"
+  },
+  "homepage": "https://github.com/LegendaryLinux/league-schedule-scraper#readme",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "node-html-parser": "^2.0.0"
+  }
+}
