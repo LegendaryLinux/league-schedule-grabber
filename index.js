@@ -29,14 +29,14 @@ axios.get(TARGET_WEBPAGE).then((response) => {
     const headers = [];
     for (let td of rows[0].querySelectorAll('td')) {
         let text = td.text;
-        headers.push(text.replaceAll(/\s{2,}/g, ' ').trim());
+        headers.push(text.replace(/\s{2,}/g, ' ').trim());
     }
 
     // Get data from desired table row
     const data = [];
     for (let td of rows[targetRow].querySelectorAll('td')) {
         let text = td.text;
-        data.push(text.replaceAll(/\s{2,}/g, '').trim())
+        data.push(text.replace(/\s{2,}/g, '').trim())
     }
 
     // Assert equal numbers of headers and columns
@@ -48,8 +48,8 @@ axios.get(TARGET_WEBPAGE).then((response) => {
     const outputFile = fs.createWriteStream(OUTPUT_FILENAME);
     for (let i=0; i < headers.length; ++i) {
         // Remove unwanted text from data fields
-        data[i] = data[i].replaceAll(/\[SIGN UP]\s?/g, '');
-        data[i] = data[i].replaceAll(/\d [Ss]ubmitted$/g,'');
+        data[i] = data[i].replace(/\[SIGN UP]\s?/g, '');
+        data[i] = data[i].replace(/\d [Ss]ubmitted$/g,'');
 
         // Specially format the Players / Category column
         if (headers[i] === 'Players / Category') {
