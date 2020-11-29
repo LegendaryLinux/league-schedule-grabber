@@ -1,6 +1,6 @@
 {
   "name": "league-schedule-grabber",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A small program to scrape a schedule row from a webpage and output it to a text file",
   "main": "index.js",
   "bin": {
