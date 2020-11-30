@@ -8,6 +8,7 @@ const { parse, valid } = require('node-html-parser');
 const TARGET_WEBPAGE = 'http://speedgaming.org/alttprleague/crew/';
 
 const createTextFile = (filename, content) => {
+    content = content.replace(/\n/g, '');
     content = content.replace(/\[SIGN UP]\s?/g, '');
     content = content.replace(/\d [Ss]ubmitted$/g,'');
 
@@ -52,11 +53,13 @@ rl.question('Which row number of the schedule do you want? Press enter for the f
 
         // Create individual files for players and teams, and for category. They come from the same column,
         // so this is as minimally janky as I can make it
-        const teamData = data[1].match(/((.*\))?_(.*\))?)?(.*) vs (.*)/);
+        data[1] = data[1].trim().replace(/\n/g, '');
+        let teamData = data[1].match(/((.*\))_(.*\)))?\s?(.*)((\s?vs\s)|(\svs\s)|(\svs\s?))(.*)/i);
+
         createTextFile('team1.txt', teamData ? (teamData[2] ? teamData[2] : 'No Team') : 'See Category File');
         createTextFile('team2.txt', teamData ? (teamData[3] ? teamData[3] : 'No Team') : 'See Category File');
         createTextFile('player1.txt', teamData ? teamData[4] : 'See Category File');
-        createTextFile('player2.txt', teamData ? teamData[5] : 'See Category File');
+        createTextFile('player2.txt', teamData ? teamData[9] : 'See Category File');
         createTextFile('category.txt', teamData ? 'See Team / Player Files' : data[1]);
 
         rl.question(`Download complete, files created.\nPress enter to close.`, () => {
