@@ -6,7 +6,15 @@ const { parse, valid } = require('node-html-parser');
 
 // Constants
 const TARGET_WEBPAGE = 'http://speedgaming.org/alttprleague/crew/';
-const OUTPUT_FILENAME = 'schedule.txt';
+
+const createTextFile = (filename, content) => {
+    content = content.replace(/\[SIGN UP]\s?/g, '');
+    content = content.replace(/\d [Ss]ubmitted$/g,'');
+
+    const file = fs.createWriteStream(filename);
+    file.write(content);
+    file.close();
+};
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 rl.question('Which row number of the schedule do you want? Press enter for the first row: ', (targetRow) => {
@@ -28,13 +36,6 @@ rl.question('Which row number of the schedule do you want? Press enter for the f
             return console.error(`There are only ${rows.length} rows in the table. You asked for row ${targetRow}.\n`);
         }
 
-        // Get table headers from the first row of the table
-        const headers = [];
-        for (let td of rows[0].querySelectorAll('td')) {
-            let text = td.text;
-            headers.push(text.replace(/\s{2,}/g, ' ').trim());
-        }
-
         // Get data from desired table row
         const data = [];
         for (let td of rows[targetRow].querySelectorAll('td')) {
@@ -42,44 +43,23 @@ rl.question('Which row number of the schedule do you want? Press enter for the f
             data.push(text.replace(/\s{2,}/g, '').trim())
         }
 
-        // Assert equal numbers of headers and columns
-        if (headers.length !== data.length) {
-            console.error("Retrieved data has inconsistent number of headers and columns.");
-            return;
-        }
+        // Create a file for each data set
+        createTextFile('time.txt', data[0]);
+        createTextFile('channel.txt', data[2]);
+        createTextFile('commentators.txt', data[3])
+        createTextFile('trackers.txt', data[4]);
+        createTextFile('notes.txt', data[5]);
 
-        const outputFile = fs.createWriteStream(OUTPUT_FILENAME);
-        for (let i=0; i < headers.length; ++i) {
-            // Remove unwanted text from data fields
-            data[i] = data[i].replace(/\[SIGN UP]\s?/g, '');
-            data[i] = data[i].replace(/\d [Ss]ubmitted$/g,'');
+        // Create individual files for players and teams, and for category. They come from the same column,
+        // so this is as minimally janky as I can make it
+        const teamData = data[1].match(/((.*\))?_(.*\))?)?(.*) vs (.*)/);
+        createTextFile('team1.txt', teamData ? (teamData[2] ? teamData[2] : 'No Team') : 'See Category File');
+        createTextFile('team2.txt', teamData ? (teamData[3] ? teamData[3] : 'No Team') : 'See Category File');
+        createTextFile('player1.txt', teamData ? teamData[4] : 'See Category File');
+        createTextFile('player2.txt', teamData ? teamData[5] : 'See Category File');
+        createTextFile('category.txt', teamData ? 'See Team / Player Files' : data[1]);
 
-            // Specially format the Players / Category column
-            if (headers[i] === 'Players / Category') {
-                // Format player matches
-                const teams = data[i].match(/((.*\))?_(.*\))?)?(.*) vs (.*)/);
-                if (teams) {
-                    outputFile.write(`${teams[2] ? teams[2] : 'No Team'}\n`);
-                    outputFile.write(`${teams[4]}\n`);
-                    outputFile.write(`${teams[3] ? teams[3] : 'No Team'}\n`);
-                    outputFile.write(`${teams[5]}\n`);
-                    continue;
-                }
-
-                // Format category matches
-                outputFile.write(`Category: ${data[i]}\n`);
-                continue;
-            }
-
-            outputFile.write(`${headers[i]}: ${data[i]}\n`);
-        }
-
-        // Watermark
-        outputFile.write("\n\nCoded by LegendaryLinux (Farrak Kilhn)\n");
-        outputFile.write("Find the code at: https://github.com/LegendaryLinux/league-schedule-grabber\n");
-        outputFile.close();
-
-        rl.question(`Download complete, schedule.txt created.\nPress enter to close.`, () => {
+        rl.question(`Download complete, files created.\nPress enter to close.`, () => {
             rl.close();
         });
 
